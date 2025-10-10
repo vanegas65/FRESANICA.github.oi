@@ -1,0 +1,13 @@
+Validación de HTML
+`yaml
+name: Validación Web
+on: push
+jobs:
+validar:
+runs-on: ubuntu-latest
+steps:
+- uses: actions/checkout@v3
+- name: Validar HTML
+uses: Vanegas65
+with:
+root: ./
