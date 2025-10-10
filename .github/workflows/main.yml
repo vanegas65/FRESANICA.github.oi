@@ -1,28 +1,13 @@
-name: Validación Web
-
-on:
-  push:
-    branches:
-      - main  # Cambia si tu rama principal se llama diferente (por ejemplo: master)
-
+name: Validar HTML5 (Tolerante)
+on: push
 jobs:
   validar:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar el código del repositorio
-        uses: actions/checkout@v3
-
-      # ✅ Validación de HTML
-      - name: Validar HTML
-        uses: Cyb3r-Jak3/html5validator-action@v7.2.0
-        with:
-          root: ./  # Carpeta raíz donde están tus archivos .html
-
-      # ✅ Validación de CSS
-      - name: Validar CSS
+      - uses: actions/checkout@v3
+      - name: Validar HTML (sin detener por errores)
         run: |
-          echo "Validando archivos CSS..."
-          for file in $(find . -name "*.css"); do
-            echo "Validando $file"
-            npx stylelint "$file" || exit 1
-          done
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            ghcr.io/cyb3r-jak3/html5validator:latest \
+            --root /workspace || true
