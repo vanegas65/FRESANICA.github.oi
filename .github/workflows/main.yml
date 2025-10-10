@@ -1,23 +1,53 @@
-name: Validación de HTML
+name: CI - Fresánica
 
 on:
   push:
     branches:
-      - main
-  pull_request:
+      - main  # o la rama principal que uses
 
 jobs:
+  # ✅ Validación HTML y CSS
   validar:
+    name: Validar HTML y CSS
     runs-on: ubuntu-latest
-    name: Validar archivos HTML
     steps:
-      - name: 🧩 Obtener el código del repositorio
+      - name: Descargar código
         uses: actions/checkout@v3
 
-      - name: 🔍 Validar HTML
+      - name: Validar HTML
         uses: Cyb3r-Jak3/html5validator-action@v7.2.0
         with:
-          root: ./
-          blacklist: node_modules
-          css: true
-          log_level: INFO
+          root: ./  # Carpeta raíz donde están tus .html
+
+      - name: Validar CSS
+        run: |
+          echo "Validando archivos CSS..."
+          for file in $(find . -name "*.css"); do
+            echo "Validando $file"
+            npx stylelint "$file" || exit 1
+          done
+
+  # 🖼 Compresión automática de imágenes
+  optimizar:
+    name: Optimizar Imágenes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Comprimir imágenes
+        uses: calibre/image-actions@v1
+        with:
+          compress: true
+          formats: jpg,png
+
+  # 🌐 Publicación automática en GitHub Pages
+  deploy:
+    name: Publicar en GitHub Pages
+    needs: [validar, optimizar] # Solo se publica si las validaciones pasan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/configure-pages@v3
+      - uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./  # Carpeta raíz del sitio
+      - uses: actions/deploy-pages@v2
